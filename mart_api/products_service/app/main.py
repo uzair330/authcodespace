@@ -171,7 +171,7 @@ async def delete_product(
 
     return {"status": "Deletion message sent to Kafka broker", "product_id": product_id}
 
-@app.get("/products/", response_model=list[Product])
+@app.get("/products/", response_model=list[Product],, tags=["All Product"])
 def read_products(session: Annotated[Session, Depends(get_session)]):
         products = session.exec(select(Product)).all()
         return products

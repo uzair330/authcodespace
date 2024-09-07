@@ -317,6 +317,3 @@ async def reset_password(
     return {"message": "Password has been reset successfully"}
 
 
-@app.get("/test-token")
-async def test_token(user_data: Annotated[dict, Depends(verify_token)]):
-    return {"message": "Token is valid", "user_data": user_data}

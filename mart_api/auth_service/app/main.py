@@ -13,6 +13,8 @@ from jose import JWTError
 from passlib.context import CryptContext
 from app import settings
 from app.utils import create_access_token, decode_access_token
+import requests
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -62,16 +64,24 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     create_db_and_tables()
     yield
 
+# Function to get the public IP address
+BASE_URL = "http://139.59.90.137"
+PORTS = "8005"
+
+
+# Define your FastAPI application
 app = FastAPI(
-    lifespan=lifespan,
     title="API end point for User Service",
     version="0.0.1",
     servers=[
-        # {"url": "http://localhost:8005", "description": "Local Server"}
-        # ,
-        {"url": "https://redesigned-dollop-vxprjgj46p2467-8005.app.github.dev", "description": "Development Server"}
+        {
+            "url": f"{BASE_URL}:{PORTS}",  # Corrected the URL syntax
+            "description": "DigitalOcean Server"
+        }
     ]
 )
+
+
 
 # Dependency to get DB session
 def get_session():

@@ -11,6 +11,10 @@ import json
 import logging
 from app.utils import decode_access_token
 from app.verification import verify_token
+import requests
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,17 +40,35 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     create_db_and_tables()
     yield
 
+
+
+BASE_URL = "http://139.59.90.137"
+PORTS = "8000"
+
+
+# Define your FastAPI application
 app = FastAPI(
-    lifespan=lifespan,
-    title="API end point for Consumer Service", 
+    title="API end point for User Service",
     version="0.0.1",
     servers=[
         {
-            "url": "https://redesigned-dollop-vxprjgj46p2467-8000.app.github.dev",  
-            "description": "Development Server"
+            "url": f"{BASE_URL}:{PORTS}",  # Corrected the URL syntax
+            "description": "DigitalOcean Server"
         }
     ]
 )
+
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can restrict this to specific domains if needed, e.g., ["http://example.com"]
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
+
 
 def get_session():
     with Session(engine) as session:
@@ -79,6 +101,15 @@ def get_current_user(token: str):
     
     # Return the extracted user data
     return {"username": username, "email": email}
+
+
+# @app.get("/get-ip")
+# def get_public_ip():
+#     try:
+#         ip = requests.get('https://api.ipify.org').text
+#         return {"public_ip": ip}
+#     except requests.RequestException:
+#         return {"public_ip": "127.0.0.1"}
 
 
 @app.get("/")
@@ -171,7 +202,7 @@ async def delete_product(
 
     return {"status": "Deletion message sent to Kafka broker", "product_id": product_id}
 
-@app.get("/products/", response_model=list[Product],, tags=["All Product"])
+@app.get("/products/", response_model=list[Product], tags=["All Product"])
 def read_products(session: Annotated[Session, Depends(get_session)]):
         products = session.exec(select(Product)).all()
         return products
